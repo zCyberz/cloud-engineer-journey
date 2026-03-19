@@ -1,0 +1,79 @@
+import json
+import requests
+import subprocess
+from datetime import datetime
+
+# ---- 1. Gọi API lấy quote (Ngày 5) ----
+def get_quote():
+    try:
+        res = requests.get("https://zenquotes.io/api/random", timeout=5)
+        data = res.json()
+        return data[0]["q"]
+    except Exception as e:
+        return "Could not fetch quote"
+
+# ---- 2. Chạy shell command (Ngày 3) ----
+def get_disk_usage():
+    import shutil
+    total, used, free = shutil.disk_usage("C:/")
+    return f"Total: {total // (2**30)}GB | Used: {used // (2**30)}GB | Free: {free // (2**30)}GB"
+
+# ---- 3. Lưu kết quả ra file JSON (Ngày 4) ----
+def save_summary(data, filename="week1_summary.json"):
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(f"✅ Saved to {filename}")
+
+# ---- 4. Đọc lại file JSON (Ngày 4) ----
+def load_summary(filename="week1_summary.json"):
+    try:
+        with open(filename, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+
+# ---- Main ----
+if __name__ == "__main__":
+    summary = {
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "days_completed": 6,
+        "topics_learned": [
+            "Day 1: IP, DNS, Linux commands",
+            "Day 2: TCP/UDP, HTTP/HTTPS, curl",
+            "Day 3: Load Balancer, Firewall, Shell Script",
+            "Day 4: Python JSON + File, Cron Job",
+            "Day 5: Python Requests + API, Git",
+            "Day 6: Week 1 Review, AWS Module 3-4"
+        ],
+        "aws_concepts": [
+            "Region vs Availability Zone",
+            "Shared Responsibility Model",
+            "IAM: User vs Role vs Group vs Policy"
+        ],
+        "quote_of_the_day": get_quote(),
+        "disk_usage": get_disk_usage()
+    }
+
+    # In ra màn hình
+    print("\n" + "="*40)
+    print("📊 WEEK 1 SUMMARY — Cloud Engineer Journey")
+    print("="*40)
+    print(f"📅 Date     : {summary['date']}")
+    print(f"✅ Days done: {summary['days_completed']}/7")
+    print(f"\n📚 Topics learned:")
+    for topic in summary["topics_learned"]:
+        print(f"   - {topic}")
+    print(f"\n☁️  AWS concepts:")
+    for concept in summary["aws_concepts"]:
+        print(f"   - {concept}")
+    print(f"\n💬 Quote    : {summary['quote_of_the_day']}")
+    print(f"💾 Disk     : {summary['disk_usage']}")
+    print("="*40)
+
+    # Lưu file
+    save_summary(summary)
+
+    # Đọc lại và verify
+    loaded = load_summary()
+    if loaded:
+        print(f"\n✅ Verify: File loaded successfully — {loaded['days_completed']} days completed")
